@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WAREEZ STICKMAN ARENA</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090b18;color:white;font-family:Arial;text-align:center}
+header{padding:18px;background:#171c32;border-bottom:2px solid #ff36b7}
+h1{font-size:25px;color:#ff36b7}
+h1 span{color:gold}
+.panel{background:#171c32;margin:15px;padding:15px;border-radius:15px}
+canvas{width:100%;max-width:750px;background:linear-gradient(#182b53,#080d1b);border:2px solid gold;border-radius:12px}
+button{padding:13px;margin:5px;border:0;border-radius:10px;background:gold;font-weight:bold;font-size:15px}
+.stats{color:#ffd45a;font-weight:bold}
+.controls button{min-width:65px;background:#ff36b7;color:white}
+#status{color:#7dffb0;font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+<h1>WAREEZ <span>STICKMAN ARENA</span></h1>
+<p>⚔️ 3D STYLE BATTLE ARENA ⚔️</p>
+</header>
+
+<div class="panel">
+<div class="stats">
+🪙 Coins: <span id="coins">0</span> |
+🏆 Wins: <span id="wins">0</span> |
+🎖 Badges: <span id="badges">0</span>
+</div>
+<p id="status">Ready for battle!</p>
+<canvas id="game" width="800" height="420"></canvas>
+<br>
+<button onclick="startGame()">START BATTLE</button>
+</div>
+
+<div class="panel">
+<h3>🎮 BATTLE CONTROLS</h3>
+<div class="controls">
+<button ontouchstart="move=-1" onmousedown="move=-1"
+onmouseup="move=0" ontouchend="move=0">◀ LEFT</button>
+<button onclick="attack()">⚔️ ATTACK</button>
+<button ontouchstart="move=1" onmousedown="move=1"
+onmouseup="move=0" ontouchend="move=0">RIGHT ▶</button>
+<button onclick="jump()">⬆ JUMP</button>
+</div>
+</div>
+
+<div class="panel">
+<h2>🏆 FREE TOURNAMENT</h2>
+<p>Entry: FREE</p>
+<p>No deposits. No betting.</p>
+<p>Earn virtual coins and climb the rankings!</p>
+<h3>LEADERBOARD</h3>
+<div id="leaderboard">1. WAREEZ — 0 wins</div>
+</div>
+
+<div class="panel">
+<h3>📱 CONTACT</h3>
+<p>Telegram: @flixlit2</p>
+<a href="https://t.me/flixlit2" style="color:gold">CONTACT ON TELEGRAM</a>
+</div>
+
+<footer>
+<p>WAREEZ STICKMAN ARENA © 2026</p>
+<p>Virtual coins have no cash value.</p>
+</footer>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let player={x:170,y:300,hp:3,vy:0};
+let enemy={x:620,y:300,hp:3};
+let coins=0,wins=0,badges=0;
+let move=0,playing=false;
+let jumping=false;
+
+function stick(x,y,color){
+ctx.strokeStyle=color;
+ctx.lineWidth=9;
+ctx.lineCap="round";
+ctx.beginPath();
+ctx.arc(x,y-85,17,0,Math.PI*2);
+ctx.moveTo(x,y-68);
+ctx.lineTo(x,y-20);
+ctx.moveTo(x,y-55);
+ctx.lineTo(x-28,y-35);
+ctx.moveTo(x,y-55);
+ctx.lineTo(x+28,y-35);
+ctx.moveTo(x,y-20);
+ctx.lineTo(x-25,y+15);
+ctx.moveTo(x,y-20);
+ctx.lineTo(x+25,y+15);
+ctx.stroke();
+}
+
+function draw(){
+ctx.clearRect(0,0,800,420);
+
+ctx.fillStyle="#111a35";
+ctx.fillRect(0,0,800,420);
+
+ctx.strokeStyle="gold";
+ctx.lineWidth=3;
+ctx.strokeRect(35,40,730,330);
+
+ctx.fillStyle="#ffffff";
+ctx.font="20px Arial";
+ctx.fillText("PLAYER",player.x-35,player.y+45);
+ctx.fillText("NINJA",enemy.x-30,enemy.y+45);
+
+stick(player.x,player.y,"#ff36b7");
+stick(enemy.x,enemy.y,"#45d9ff");
+
+ctx.fillStyle="white";
+ctx.font="18px Arial";
+ctx.fillText("YOU: "+player.hp+" ❤️",40,25);
+ctx.fillText("ENEMY: "+enemy.hp+" ❤️",620,25);
+}
+
+function startGame(){
+player.x=170;
+player.y=300;
+player.hp=3;
+player.vy=0;
+enemy.x=620;
+enemy.hp=3;
+playing=true;
+document.getElementById("status").innerText="FIGHT! ⚔️";
+draw();
+loop();
+}
+
+function attack(){
+if(!playing)return;
+
+if(Math.abs(player.x-enemy.x)<125){
+enemy.hp--;
+
+if(enemy.hp<=0){
+wins++;
+coins+=25;
+badges++;
+playing=false;
+
+document.getElementById("status").innerText=
+"🏆 VICTORY! +25 VIRTUAL COINS";
+
+update();
+}
+}
+}
+
+function jump(){
+if(playing&&player.y>=300){
+player.vy=-14;
+jumping=true;
+}
+}
+
+function loop(){
+if(!playing)return;
+
+player.x+=move*5;
+player.x=Math.max(60,Math.min(740,player.x));
+
+player.vy+=0.6;
+player.y+=player.vy;
+
+if(player.y>300){
+player.y=300;
+player.vy=0;
+jumping=false;
+}
+
+if(Math.abs(player.x-enemy.x)<85&&Math.random()<0.025){
+player.hp--;
+
+if(player.hp<=0){
+playing=false;
+document.getElementById("status").innerText="MATCH OVER! TRY AGAIN";
+}
+}
+
+if(enemy.hp>0){
+enemy.x+=Math.sign(player.x-enemy.x)*1.2;
+}
+
+draw();
+requestAnimationFrame(loop);
+}
+
+function update(){
+document.getElementById("coins").innerText=coins;
+document.getElementById("wins").innerText=wins;
+document.getElementById("badges").innerText=badges;
+document.getElementById("leaderboard").innerText=
+"1. WAREEZ — "+wins+" wins";
+}
+
+document.addEventListener("keydown",e=>{
+if(e.key==="ArrowLeft"||e.key==="a")move=-1;
+if(e.key==="ArrowRight"||e.key==="d")move=1;
+if(e.key===" ")jump();
+if(e.key==="j")attack();
+});
+
+document.addEventListener("keyup",e=>{
+if(["ArrowLeft","ArrowRight","a","d"].includes(e.key))move=0;
+});
+
+draw();
+</script>
+</body>
+</html>
